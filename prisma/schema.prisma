@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String        @unique
+  password_hash String
+  Listings      Listing[]
+  Reviews       Review[]
+  Reservations  Reservation[]
+  created_at    DateTime      @default(now())
+}
+
+model Listing {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  city            String
+  description     String
+  pet_policy      String
+  sound_level     String
+  images          String[]
+  amenities       String[]
+  price_per_night Int
+  max_guests      Int
+  bathrooms       Int
+  rooms           Int
+  beds            Int
+  faq             Faq[]
+  host            User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tags            String[]
+  reviews         Review[]
+  user_id         String        @db.ObjectId
+  Reservations    Reservation[]
+  created_at      DateTime      @default(now())
+}
+
+type Faq {
+  question String
+  answer   String
+}
+
+model Review {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  content    String
+  rating     Int?
+  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    String   @db.ObjectId
+  Listing    Listing  @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+  listing_id String   @db.ObjectId
+  created_at DateTime @default(now())
+}
+
+model Reservation {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  from_date  DateTime
+  to_date    DateTime
+  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    String   @db.ObjectId
+  Listing    Listing  @relation(fields: [listing_id], references: [id])
+  listing_id String   @db.ObjectId
+  created_at DateTime @default(now())
+}
